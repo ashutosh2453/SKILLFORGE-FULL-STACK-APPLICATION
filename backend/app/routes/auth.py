@@ -1,8 +1,14 @@
-from flask import Blueprint, request, jsonify
+import re
+
+from flask import Blueprint, current_app, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models import db, User, Profile, Career, Skill, UserSkill
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
+
+EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+USERNAME_RE = re.compile(r'^[A-Za-z0-9_.-]{3,30}$')
+MIN_PASSWORD_LENGTH = 8
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
@@ -14,6 +20,15 @@ def register():
 
     if not email or not username or not password:
         return jsonify({'error': 'Email, username, and password are required'}), 400
+
+    if not EMAIL_RE.match(email) or len(email) > 254:
+        return jsonify({'error': 'Enter a valid email address'}), 400
+
+    if not USERNAME_RE.match(username):
+        return jsonify({'error': 'Username must be 3-30 letters, digits, dots, dashes or underscores'}), 400
+
+    if len(password) < MIN_PASSWORD_LENGTH:
+        return jsonify({'error': f'Password must be at least {MIN_PASSWORD_LENGTH} characters'}), 400
 
     if User.query.filter_by(email=email).first():
         return jsonify({'error': 'Email is already registered'}), 409
@@ -80,7 +95,13 @@ def login():
 def demo_login():
     """
     Instant role switcher for demonstration (Student, Mentor, Admin).
+
+    Only available when DEMO_MODE is on: it hands out tokens (including admin) without a
+    password, so it must never be reachable in a real deployment.
     """
+    if not current_app.config.get('DEMO_MODE'):
+        return jsonify({'error': 'Demo login is disabled'}), 404
+
     data = request.get_json() or {}
     role = data.get('role', 'student').lower()
 

@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from app.config import config_by_name
+from app.config import config_by_name, validate_production_config
 from app.models import db
 
 jwt = JWTManager()
@@ -9,6 +9,10 @@ jwt = JWTManager()
 def create_app(config_name='development'):
     app = Flask(__name__)
     app.config.from_object(config_by_name[config_name])
+    if config_name == "production":
+        problems = validate_production_config(app.config)
+        if problems:
+            raise RuntimeError("Refusing to start in production: " + "; ".join(problems))
 
     # Enable CORS
     CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -74,7 +78,8 @@ def create_app(config_name='development'):
         return jsonify({
             'status': 'healthy',
             'platform': 'SkillForge Engine',
-            'version': '1.0.0'
+            'version': '1.0.0',
+            'demo_mode': bool(app.config.get('DEMO_MODE')),
         }), 200
 
     # Global Error Handlers
