@@ -46,6 +46,7 @@ export const api = {
   login: (payload: any) => request<any>('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
   demoLogin: (role: string) => request<any>('/auth/demo-login', { method: 'POST', body: JSON.stringify({ role }) }),
   getMe: () => request<any>('/auth/me'),
+  health: () => request<{ status: string; demo_mode?: boolean }>('/health'),
 
   // Profile
   getProfile: () => request<any>('/profile'),
