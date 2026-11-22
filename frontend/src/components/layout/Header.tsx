@@ -18,6 +18,7 @@ import {
 import { useAuthStore } from '../../store/authStore';
 import { api } from '../../services/api';
 import { Notification } from '../../types';
+import { useDemoMode } from '../../hooks/useDemoMode';
 
 interface HeaderProps {
   onOpenCommandPalette: () => void;
@@ -25,6 +26,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onOpenCommandPalette }) => {
   const { user, logout, theme, toggleTheme, demoLogin } = useAuthStore();
+  const demoMode = useDemoMode();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -84,8 +86,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCommandPalette }) => {
 
       {/* Right Controls Area */}
       <div className="flex items-center gap-2.5 sm:gap-3">
-        {/* Role Quick Switcher Pills */}
-        <div className="hidden lg:flex items-center bg-slate-900/90 border border-slate-800 p-1 rounded-xl gap-1">
+        {/* Role Quick Switcher Pills (demo mode only: it logs into shared demo accounts) */}
+        {demoMode && <div className="hidden lg:flex items-center bg-slate-900/90 border border-slate-800 p-1 rounded-xl gap-1">
           <button
             onClick={() => handleRoleSwitch('student')}
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
@@ -119,7 +121,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCommandPalette }) => {
             <Shield className="w-3.5 h-3.5" />
             Admin
           </button>
-        </div>
+        </div>}
 
         {/* Streak Counter */}
         {user?.profile && (

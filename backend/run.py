@@ -22,5 +22,8 @@ with app.app_context():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    print(f"SkillForge Backend API starting on http://localhost:{port}")
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # Loopback by default: the Werkzeug debugger allows arbitrary code execution, so never
+    # expose a debug server on the network. Use a WSGI server (gunicorn) for deployments.
+    host = os.environ.get('HOST', '127.0.0.1')
+    print(f"SkillForge Backend API starting on http://{host}:{port}")
+    app.run(host=host, port=port, debug=app.config['DEBUG'])

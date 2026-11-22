@@ -249,8 +249,13 @@ cp .env.example backend/.env
 |---|---|---|
 | `FLASK_ENV` | `development` | Flask environment mode |
 | `PORT` | `5000` | Backend server port |
-| `SECRET_KEY` | (preset) | Flask secret key |
-| `JWT_SECRET_KEY` | (preset) | JWT signing key |
+| `SECRET_KEY` | dev-only key | Flask secret key. **Required in production** (32+ random characters) |
+| `JWT_SECRET_KEY` | dev-only key | JWT signing key. **Required in production** (32+ random characters) |
+| `SKILLFORGE_DEMO_MODE` | on in development, off in production | Enables `/api/auth/demo-login` (password-less demo accounts, including admin) |
+| `HOST` | `127.0.0.1` | Bind address for the development server |
+
+> **Security:** production (`FLASK_ENV=production`) refuses to start with the development keys or the
+> keys that were previously committed to this repository, and disables demo login unless you opt in.
 | `DATABASE_URL` | `sqlite:///skillforge.db` | Database URI (supports PostgreSQL) |
 
 ---
@@ -277,7 +282,7 @@ The database is pre-seeded with three demo accounts:
 |---|---|---|---|
 | `POST` | `/api/auth/register` | Register new user | ❌ |
 | `POST` | `/api/auth/login` | Login with credentials | ❌ |
-| `POST` | `/api/auth/demo-login` | Quick demo role login | ❌ |
+| `POST` | `/api/auth/demo-login` | Quick demo role login (demo mode only) | ❌ |
 | `GET` | `/api/auth/me` | Get authenticated user | ✅ |
 
 ### Profile & Onboarding

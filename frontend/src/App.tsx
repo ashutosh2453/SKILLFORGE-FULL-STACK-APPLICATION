@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './store/authStore';
 import { AppLayout } from './components/layout/AppLayout';
@@ -20,6 +20,7 @@ import { AchievementsPage } from './pages/AchievementsPage';
 import { AdminPage } from './pages/AdminPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { AuthPage } from './pages/AuthPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +30,17 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+/** Sends signed-out visitors to the sign-in page, then back to where they were going. */
+const RequireAuth: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+  const { isAuthenticated, isLoading } = useAuthStore();
+  const location = useLocation();
+  if (!isAuthenticated && !isLoading) {
+    const next = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/login?next=${next}`} replace />;
+  }
+  return children;
+};
 
 export const App: React.FC = () => {
   const { fetchUser, isAuthenticated, isLoading } = useAuthStore();
@@ -44,9 +56,10 @@ export const App: React.FC = () => {
           {/* Public Landing & Onboarding */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
+          <Route path="/login" element={<AuthPage />} />
 
           {/* Authenticated / App Workspace */}
-          <Route element={<AppLayout />}>
+          <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/roadmap" element={<RoadmapPage />} />
             <Route path="/skills" element={<SkillsPage />} />

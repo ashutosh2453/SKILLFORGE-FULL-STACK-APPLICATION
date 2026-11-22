@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
+import { useDemoMode } from '../hooks/useDemoMode';
 import { Career, Skill } from '../types';
 
 export const OnboardingPage: React.FC = () => {
@@ -37,7 +38,8 @@ export const OnboardingPage: React.FC = () => {
   const [learningStyle, setLearningStyle] = useState<'videos' | 'reading' | 'projects' | 'practice' | 'mixed'>('mixed');
   const [isForging, setIsForging] = useState(false);
   
-  const { user, login, demoLogin } = useAuthStore();
+  const { user, demoLogin } = useAuthStore();
+  const demoMode = useDemoMode();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -63,6 +65,12 @@ export const OnboardingPage: React.FC = () => {
     setIsForging(true);
     try {
       if (!user) {
+        if (!demoMode) {
+          // No password-less accounts here: create an account first, then finish onboarding.
+          setIsForging(false);
+          navigate('/login?mode=signup&next=/onboarding');
+          return;
+        }
         await demoLogin('student');
       }
 

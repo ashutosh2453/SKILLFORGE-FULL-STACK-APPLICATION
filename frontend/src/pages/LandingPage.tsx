@@ -17,9 +17,11 @@ import {
   Code2
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { useDemoMode } from '../hooks/useDemoMode';
 
 export const LandingPage: React.FC = () => {
   const { demoLogin, isAuthenticated } = useAuthStore();
+  const demoMode = useDemoMode();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'graph' | 'gap' | 'readiness'>('graph');
 
@@ -58,12 +60,21 @@ export const LandingPage: React.FC = () => {
             </NavLink>
           ) : (
             <>
-              <button
-                onClick={() => handleQuickDemo('student')}
-                className="hidden sm:inline-flex px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-violet-500/60 text-slate-200 hover:text-white text-xs font-semibold transition"
-              >
-                Instant Demo
-              </button>
+              {demoMode ? (
+                <button
+                  onClick={() => handleQuickDemo('student')}
+                  className="hidden sm:inline-flex px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-violet-500/60 text-slate-200 hover:text-white text-xs font-semibold transition"
+                >
+                  Instant Demo
+                </button>
+              ) : (
+                <NavLink
+                  to="/login"
+                  className="hidden sm:inline-flex px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-violet-500/60 text-slate-200 hover:text-white text-xs font-semibold transition"
+                >
+                  Sign in
+                </NavLink>
+              )}
               <NavLink
                 to="/onboarding"
                 className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-lg shadow-violet-600/30"
@@ -125,12 +136,14 @@ export const LandingPage: React.FC = () => {
             Start Forging Your Path
             <ArrowRight className="w-4 h-4" />
           </NavLink>
-          <button
-            onClick={() => handleQuickDemo('student')}
-            className="px-6 py-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 text-slate-200 font-semibold text-sm sm:text-base transition hover:bg-slate-800/80"
-          >
-            Explore Live Demo Platform →
-          </button>
+          {demoMode && (
+            <button
+              onClick={() => handleQuickDemo('student')}
+              className="px-6 py-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 text-slate-200 font-semibold text-sm sm:text-base transition hover:bg-slate-800/80"
+            >
+              Explore Live Demo Platform →
+            </button>
+          )}
         </motion.div>
 
         {/* Interactive Hero Visual Container */}
